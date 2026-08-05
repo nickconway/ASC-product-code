@@ -8,7 +8,7 @@ esphome:
   name_add_mac_suffix: true
   project:
     name: AppliedSensorCo.SlumberTek
-    version: 0.3.1
+    version: 0.3.2
 
 esp32:
   board: esp32-c3-devkitm-1
@@ -121,6 +121,11 @@ globals:
   restore_value: yes
   initial_value: '1'
 
+- id: signal_change_requirement
+  type: float
+  restore_value: yes
+  initial_value: '0.01'
+
 - id: filteredSignal
   type: float
   restore_value: yes
@@ -207,6 +212,11 @@ globals:
   initial_value: 'false'
 
 - id: filter_amount
+  type: int
+  restore_value: yes
+  initial_value: '1'
+
+- id: threshold_filter_amount
   type: int
   restore_value: yes
   initial_value: '1'
@@ -432,6 +442,24 @@ number:
         id(volt_update_interval) = x;
 
 - platform: template
+  name: Minimum voltage change to publish
+  id: signal_change_number
+  entity_category: diagnostic
+  icon: mdi:delta
+  update_interval: never
+  initial_value: 0.01
+  min_value: 0.004
+  max_value: 0.2
+  step: 0.001
+  optimistic: true
+  restore_value: true
+  retain: false
+  on_value:
+    then:
+    - lambda: |-
+        id(signal_change_requirement) = x;
+
+- platform: template
   name: Auto-calibration interval (0 is off)
   id: auto_calibration_number
   device_class: duration
@@ -469,6 +497,24 @@ number:
     then:
     - lambda: |-
         id(filter_amount) = x;
+
+- platform: template
+  name: Dynamic Threshold Filter (1 fast, 2 medium, 3 slow)
+  id: threshold_filter_change_number
+  entity_category: diagnostic
+  icon: mdi:filter-settings-outline
+  update_interval: never
+  initial_value: 1
+  min_value: 1
+  max_value: 3
+  step: 1
+  optimistic: true
+  restore_value: true
+  retain: false
+  on_value:
+    then:
+    - lambda: |-
+        id(threshold_filter_amount) = x;
 
 - platform: template
   name: Auto-calibration trigger sensitivity (Higher requires larger in-out of bed voltage changes to trigger auto-calibration)
@@ -646,6 +692,12 @@ button:
   on_press:
     - component.update: update_http_request
 
+- platform: factory_reset
+  name: SlumberTek Factory Reset (wifi will reset, go to docs.asc.com to fix)
+  id: factory_reset_button
+  entity_category: diagnostic
+  icon: mdi:restore-alert
+
 interval:
 - interval: 50ms
   then:
@@ -654,9 +706,9 @@ interval:
       static float lowPassB[] = {0, 0};  // Numerator coefficients
       static float lowPassA[] = {0, 0};        // Denominator coefficients
 
-      // Butterworth low-pass filter coefficients for the threshold signal (0.01 Hz cutoff)
-      const float thresholdB[] = {0.00156833, 0.00156833};  // Numerator coefficients
-      const float thresholdA[] = {1.0, -0.99686333};        // Denominator coefficients
+      // Butterworth low-pass filter coefficients for the threshold signal
+      static float thresholdB[] = {0, 0};  // Numerator coefficients
+      static float thresholdA[] = {0, 0};        // Denominator coefficients
 
       // Variables for the main low-pass filter
       static float lowPassPrevInput = 0;          // Stores the last input value for low-pass filter
@@ -725,11 +777,13 @@ interval:
         id(empty_bed_sensitivity_number).publish_state(id(empty_bed_sensitivity_threshold));
         id(visible_midpoint).publish_state(id(midpoint_g));
         id(filter_change_number).publish_state(id(filter_amount));
+        id(threshold_filter_change_number).publish_state(id(threshold_filter_amount));
         id(auto_cali_trigger_number).publish_state(id(auto_cali_triggering_sensitivity));
         id(Bed_binary_trigger).publish_state(id(sensorBoolValue));
         id(empty_bed_limit_voltage_adjuster).publish_state(id(empty_bed_adjuster_g));
         id(full_bed_limit_voltage_adjuster).publish_state(id(full_bed_adjuster_g));
         id(update_interval_number).publish_state(id(volt_update_interval));
+        id(signal_change_number).publish_state(id(signal_change_requirement));
         id(on_validation_number).publish_state(id(on_validation));
         id(off_validation_number).publish_state(id(off_validation));
       }
@@ -748,6 +802,18 @@ interval:
       } else {  // 0.05 Hz cutoff
         lowPassB[0] = 0.00779294; lowPassB[1] = 0.00779294;
         lowPassA[0] = 1.0;         lowPassA[1] = -0.98441413;
+      }
+
+      // Set threshold filter coefficients based on threshold_filter_amount
+      if (id(threshold_filter_amount) == 1) {  // 0.01 Hz cutoff
+        thresholdB[0] = 0.00156833; thresholdB[1] = 0.00156833;
+        thresholdA[0] = 1.0;        thresholdA[1] = -0.99686333;
+      } else if (id(threshold_filter_amount) == 2) {  // 0.005 Hz cutoff
+        thresholdB[0] = 0.00078478; thresholdB[1] = 0.00078478;
+        thresholdA[0] = 1.0;        thresholdA[1] = -0.99843044;
+      } else {  // 0.002 Hz cutoff
+        thresholdB[0] = 0.00031406; thresholdB[1] = 0.00031406;
+        thresholdA[0] = 1.0;        thresholdA[1] = -0.99937188;
       }
 
       float lowPassOutput = lowPassB[0] * voltage + lowPassB[1] * lowPassPrevInput - lowPassA[1] * lowPassPrevOutput;
@@ -885,7 +951,7 @@ interval:
       static float prevLowPassOutputPub = lowPassOutput;
       static float prevDynFullBedThresPub = dynamicFullBedThreshold;
       static float prevDynEmptyBedThresPub = dynamicEmptyBedThreshold;
-      float signalChangeRequirement = 0.004; // roughly 5 counts of 3.3/4095 resolution
+      float signalChangeRequirement = id(signal_change_requirement);
       if ( id(volt_update_interval) > 0) {
           if (currentTime - intervalTimer >= volt_update_interval_ms || startUpFlag) {
             // Only publish the new value 
@@ -1032,6 +1098,10 @@ script:
   then:
   - lambda: |-
       id(empty_bed_limit_g) = id(midpoint_g) + (id(limit_adjuster_amount) * id(empty_bed_adjuster_g)) / 10.0;
+      if (id(empty_bed_limit_g) > 3.295)
+        {
+          id(empty_bed_limit_g) = 3.295; // Clamping upper limit to just below the max possible voltage range
+        }
       id(full_bed_limit_g) = id(midpoint_g) - (id(limit_adjuster_amount) * id(full_bed_adjuster_g)) / 10.0;
       id(sensitivity_base) = (id(empty_bed_limit_g) - id(full_bed_limit_g)) / 10.0; // update 10 steps, 
       //ESP_LOGD("script", "sensitivity_base %.3f.", id(sensitivity_base));

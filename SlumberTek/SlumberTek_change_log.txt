@@ -1,14 +1,18 @@
 Go to the ASC Discord channel if you have any questions about the changes - https://discord.gg/cB9P6NmYJg
 
-Ver 0.3.2 (ideas - in progress)
- - Increase the default Voltage change needed to send data to MQTT
+Ver 0.3.3 (remaining ideas)
  - Add occupancy requirement of 1-2 hours as a requirement for auto-calibrations
  - Full slumberTek name and mac address sent to MQTT?
  - substitution at the file front?
- - maybe set discovery to true so it can always read from it, not easy to get rid of retained if device is removed
- - Look into disable_by_default to clean some UI elements with the option to switch them on
  - add a minimum calibration gap, like 0.05V to keep from run away calibrations
- - add wifi reset button to diagnostic section
+ - Clamp full_bed_limit_g so it can't go below the min (0V) signal value
+
+Ver 0.3.2 (ideas - in progress)
+ - Increase signalChangeRequirement default value from 0.004V to 0.01V to reduce data sending, and exposed it as an adjustable slider ("Minimum voltage change to publish", 0.004V to 0.2V)
+ - Note: the above only controls how often data is sent, it has no effect on bed detection. Large values mean the Pressure Voltage and Dynamic Threshold sensors will update rarely.
+ - Added "Dynamic Threshold Filter (1 fast, 2 medium, 3 slow)" slider so the dynamic threshold tracking speed can be slowed down, same as the existing Pressure Voltage Filter. Level 1 is the previous behaviour, so nothing changes unless you move it.
+ - Added Factory reset button to diagnostic section
+ - Clamped the empty_bed_limit_g so it can't go above the max (3.3V) signal value.
 
 Ver 0.3.1 (Hotfix - 1/21/26)
  - ESPHome changed the max length of characters for Entities down to 120

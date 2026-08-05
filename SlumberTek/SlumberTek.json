@@ -1,6 +1,6 @@
 {
   "name": "SlumberTek Firmware",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "home_assistant_domain": "esphome",
   "new_install_skip_erase": false,
   "builds": [
@@ -8,9 +8,9 @@
       "chipFamily": "ESP32-C3",
       "ota": {
         "path": "https://raw.githubusercontent.com/AppliedSensorCo/ASC-product-code/main/SlumberTek/slumbertek.ota.bin",
-        "md5": "5a2e440e85351e9ae0eff72e1618493b",
-        "summary": "Keeping up to date with latest ESPHome updates. Added 'SlumberTek firmware check' button. Implemented feedback to increased default 'Auto-calibration trigger sensitivity' from 75% to 125%, and maximum value up to 400%",
-        "release_url": "https://github.com/AppliedSensorCo/ASC-product-code/blob/main/SlumberTek/SlumberTek_change_log.txt"        
+        "md5": "96717cd6f051202d5a2b9531e213a2a7",
+        "summary": "Keeping up to date with latest ESPHome updates. Adds a Factory reset button, a 'Dynamic Threshold Filter' for exploring filter rates, and 'Minimum voltage change to publish' to reduce signal sending to HA (default raised to 0.01V).",
+        "release_url": "https://github.com/AppliedSensorCo/ASC-product-code/blob/main/SlumberTek/SlumberTek_change_log.txt"
       },
       "parts": [
         {

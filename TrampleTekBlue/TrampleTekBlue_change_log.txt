@@ -1,6 +1,8 @@
 Go to the ASC Discord channel if you have any questions about the changes - https://discord.gg/cB9P6NmYJg
 
  Ver 0.1.5 (ideas, not released)
+ - Enable a slider to adjust the "off" signal requirement
+ - add a 3 second green light to show the device just turned on
  - Move to ESP-IDF from arduino compiler, need to do it sometime...
  - Added MQTT data logging to ASC server
 
