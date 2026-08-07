@@ -5,7 +5,7 @@ Ver 0.3.3 (remaining ideas)
  - Full slumberTek name and mac address sent to MQTT?
  - substitution at the file front?
  - add a minimum calibration gap, like 0.05V to keep from run away calibrations
- - Clamp full_bed_limit_g so it can't go below the min (0V) signal value
+ - Clamp full_bed_limit_g so it can't go below the min (0V) signal value? Seems Unnecessary since to zero is near impossible without a complete short circuit.
 
 Ver 0.3.2 (ideas - in progress)
  - Increase signalChangeRequirement default value from 0.004V to 0.01V to reduce data sending, and exposed it as an adjustable slider ("Minimum voltage change to publish", 0.004V to 0.2V)

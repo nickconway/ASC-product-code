@@ -1,2 +1,7 @@
 #Ignore the this workspace file
 ASC-product-code.code-workspace
+
+#Ignore Claude Code files
+CLAUDE.md
+CLAUDE.local.md
+.claude/
