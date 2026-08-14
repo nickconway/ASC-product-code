@@ -7,7 +7,7 @@ Ver 0.3.3 (remaining ideas)
  - add a minimum calibration gap, like 0.05V to keep from run away calibrations
  - Clamp full_bed_limit_g so it can't go below the min (0V) signal value? Seems Unnecessary since to zero is near impossible without a complete short circuit.
 
-Ver 0.3.2 (ideas - in progress)
+Ver 0.3.2 (release 8/5/26)
  - Increase signalChangeRequirement default value from 0.004V to 0.01V to reduce data sending, and exposed it as an adjustable slider ("Minimum voltage change to publish", 0.004V to 0.2V)
  - Note: the above only controls how often data is sent, it has no effect on bed detection. Large values mean the Pressure Voltage and Dynamic Threshold sensors will update rarely.
  - Added "Dynamic Threshold Filter (1 fast, 2 medium, 3 slow)" slider so the dynamic threshold tracking speed can be slowed down, same as the existing Pressure Voltage Filter. Level 1 is the previous behaviour, so nothing changes unless you move it.
