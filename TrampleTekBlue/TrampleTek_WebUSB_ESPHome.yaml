@@ -38,7 +38,7 @@ ota:
   - platform: esphome
   - platform: http_request
     id: ota_http_request
-  
+
 update:
   - platform: http_request
     id: update_http_request
@@ -99,7 +99,7 @@ globals:
     type: bool
     initial_value: 'false'
     restore_value: yes
-  
+
   - id: reset_counter
     type: int
     restore_value: yes
@@ -114,7 +114,7 @@ binary_sensor:
   - platform: template
     name: "Mat Sensor"
     id: Mat_binary_trigger
-  
+
 select:
   - platform: template
     name: Dropdown Sensitivity
@@ -132,7 +132,7 @@ select:
             auto index = id(mat_sensitivity_select).active_index();
             if (index != 4) {
               id(selectFlag) = true;
-              if (index == 0) {           
+              if (index == 0) {
                 id(step_event_threshold) = 0.06;
                 id(matGradientReq) = 0.04;
                 id(dropdownSelectIndex) = 0;
@@ -148,12 +148,12 @@ select:
                 id(step_event_threshold) = 0.70;
                 id(matGradientReq) = 0.25;
                 id(dropdownSelectIndex) = 3;
-              } 
+              }
               id(step_threshold_number).publish_state(id(step_event_threshold));
             } else {
               id(dropdownSelectIndex) = 4;
             }
-           
+
 
 number:
   - platform: template
@@ -171,7 +171,7 @@ number:
       then:
         - lambda: |-
             auto index = id(mat_sensitivity_select).active_index();
-            if (id(selectFlag) == true){              
+            if (id(selectFlag) == true){
               if (id(calibration_button).state == true) {
                 id(calibration_button).publish_state(false);
               }
@@ -222,7 +222,7 @@ number:
   #           id: mat_sensitivity_select
   #           option: "Custom"
 
-sensor:            
+sensor:
   - platform: template
     name: "Pressure Voltage"
     id: visible_pressure_voltage
@@ -250,7 +250,7 @@ sensor:
     entity_category: "diagnostic"
     accuracy_decimals: 0
 
-  # # For debugging mat signal gradient  
+  # # For debugging mat signal gradient
   # - platform: template
   #   name: "Gradient viz"
   #   id: gradient_viz
@@ -260,7 +260,7 @@ sensor:
 
 switch:
   - platform: template
-    name: "Calibration (place your mat, turn on calibration, put your desired load on mat, turn off calibration - auto adjusts Sensitivity for you)"
+    name: "Calibration (turn on calibration, put your desired load on mat, turn off calibration - auto adjusts Sensitivity for you)"
     id: calibration_button
     optimistic: true
 
@@ -354,7 +354,7 @@ interval:
           matGradient = 0;
         } else {
           matGradient = (matDataAvg - previous_matDataAvg) / 0.050;   // difference divided by interval
-        }                      
+        }
 
         if (matDownThresholdLock == true && justFlippedOff == true) {
           matDownThresholdLock = false;
@@ -429,7 +429,7 @@ interval:
           justFlippedOff = true;
           id(sensorBoolValue) = false;
           id(Mat_binary_trigger).publish_state(false);
-        }        
+        }
 
         if (id(calibration_button).state == true) {
           if (calibrationFirstLoop == true) {
@@ -440,7 +440,7 @@ interval:
           } else {
             calibrationChange = (calibrationMatDataStart - matDataAvg) * 0.6; // reduce the number a little to ensure the mat can reach and go below the calibration threshold
             if (calibrationChange > prevCalibrationChange) {
-              float truncatedCaliValue = ((int)(calibrationChange * 100)) / 100.0; // need to cut down to only 2 decimals  
+              float truncatedCaliValue = ((int)(calibrationChange * 100)) / 100.0; // need to cut down to only 2 decimals
               //id(step_event_threshold) = truncatedCaliValue;
               id(step_threshold_number).publish_state(truncatedCaliValue);
 
