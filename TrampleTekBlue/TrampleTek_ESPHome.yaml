@@ -3,6 +3,7 @@
 esphome:
   name: [your device name]
   friendly_name: [your friendly device name]
+  comment: TrampleTek Blue
   project:
     name: AppliedSensorCo.TrampleTek_Blue
     version: 0.1.4
